@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Application Tracker</title>
+<meta name="description" content="Track job applications, score role fit, manage follow-ups, and monitor your pipeline. Runs entirely in your browser." />
+<link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="container">
+    <a href="index.html" class="brand">Application Tracker</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="tracker.html" class="active">Application Tracker</a>
+    </div>
+    <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+  </div>
+</nav>
+
+<main class="container">
+
+  <div class="page-header">
+    <h1 class="page-title">Application Tracker</h1>
+    <p class="page-subtitle">Track job applications, prioritize high-fit roles, and manage follow-ups.</p>
+  </div>
+
+  <div class="section">
+    <div class="banner">
+      <span>🔒</span>
+      <span>Your data is stored locally in your browser unless you export it.</span>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="section">
+    <h2 class="section-title">Overview</h2>
+    <div class="metrics" id="metrics"></div>
+  </div>
+
+  <!-- Quick Add -->
+  <div class="section">
+    <h2 class="section-title">Quick Add Application</h2>
+    <div class="card">
+      <form id="add-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-company">Company *</label>
+            <input type="text" id="f-company" required maxlength="120" placeholder="e.g. Meridian Group" />
+          </div>
+          <div class="field">
+            <label for="f-role">Role Title *</label>
+            <input type="text" id="f-role" required maxlength="120" placeholder="e.g. Strategy Analyst" />
+          </div>
+          <div class="field">
+            <label for="f-track">Track</label>
+            <select id="f-track"></select>
+          </div>
+          <div class="field">
+            <label for="f-resume">Resume Version</label>
+            <select id="f-resume"></select>
+          </div>
+
+          <div class="field">
+            <label for="f-status">Status</label>
+            <select id="f-status"></select>
+          </div>
+          <div class="field">
+            <label for="f-fitscore">Fit Score (1–10) *</label>
+            <input type="number" id="f-fitscore" min="1" max="10" step="1" value="7" required />
+            <div class="field-hint">Apply seriously to roles scoring 7 or above.</div>
+          </div>
+          <div class="field">
+            <label for="f-applied">Applied Date</label>
+            <input type="date" id="f-applied" />
+          </div>
+          <div class="field">
+            <label for="f-followup">Follow-up Date</label>
+            <input type="date" id="f-followup" />
+          </div>
+
+          <div class="field span-2">
+            <label for="f-joblink">Job Link</label>
+            <input type="url" id="f-joblink" placeholder="https://..." />
+          </div>
+          <div class="field">
+            <label for="f-salary">Salary Estimate</label>
+            <input type="text" id="f-salary" placeholder="e.g. $90k–$100k" />
+          </div>
+          <div class="field">
+            <label for="f-contact">Contact Person</label>
+            <input type="text" id="f-contact" placeholder="Optional" />
+          </div>
+
+          <div class="field span-4">
+            <label for="f-notes">Notes</label>
+            <textarea id="f-notes" placeholder="Optional"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="add-form-reset">Reset</button>
+          <button type="submit" class="btn btn-primary">Add Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Follow-ups Due -->
+  <div class="section">
+    <h2 class="section-title">Follow-ups Due</h2>
+    <div class="card">
+      <div class="followup-list" id="followup-list"></div>
+    </div>
+  </div>
+
+  <!-- Fit scoring guide -->
+  <div class="section">
+    <details class="guide">
+      <summary>Fit Scoring Guide — how to score a role</summary>
+      <div class="guide-body">
+        <ul>
+          <li>+2 if the role involves strategy, advisory, market intelligence, research, or business analysis.</li>
+          <li>+2 if it involves AI, fintech, cyber, VC, digital infrastructure, technology, or a Southeast Asia focus.</li>
+          <li>+2 if it values research, insights, data, risk, investigation, or structured analysis.</li>
+          <li>+1 if salary likely meets your target.</li>
+          <li>+1 if the company brand helps long-term positioning.</li>
+          <li>-2 if the role is mostly Scrum, backlog, customer support, project coordination, or pure delivery work.</li>
+        </ul>
+        <div class="guide-rec">
+          <div><strong>8–10</strong> — strong fit. Apply seriously.</div>
+          <div><strong>6–7</strong> — possible fit. Apply if bandwidth allows.</div>
+          <div><strong>1–5</strong> — low priority. Deprioritize or skip.</div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Filters -->
+  <div class="section">
+    <h2 class="section-title">Filters</h2>
+    <div class="card">
+      <div class="toolbar">
+        <div class="field search">
+          <label for="filter-search">Search</label>
+          <input type="text" id="filter-search" placeholder="Search company or role..." />
+        </div>
+        <div class="field">
+          <label for="filter-status">Status</label>
+          <select id="filter-status"></select>
+        </div>
+        <div class="field">
+          <label for="filter-track">Track</label>
+          <select id="filter-track"></select>
+        </div>
+        <div class="field">
+          <label for="filter-resume">Resume Version</label>
+          <select id="filter-resume"></select>
+        </div>
+        <div class="field">
+          <label for="filter-priority">Priority</label>
+          <select id="filter-priority">
+            <option value="all">All Priorities</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sort-field">Sort by</label>
+          <select id="sort-field">
+            <option value="appliedDate">Applied Date</option>
+            <option value="followUpDate">Follow-up Date</option>
+            <option value="fitScore">Fit Score</option>
+            <option value="company">Company</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+        <div class="field" style="max-width: 120px;">
+          <label for="sort-dir">Order</label>
+          <select id="sort-dir">
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
+          </select>
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top: 14px; justify-content: space-between;">
+        <div class="text-muted" id="filter-summary" style="font-size: 13px;"></div>
+        <div class="data-actions">
+          <button class="btn btn-sm" id="btn-export-csv">Export CSV</button>
+          <button class="btn btn-sm" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-sm" id="btn-import-json">Import JSON</button>
+          <input type="file" id="import-file-input" accept="application/json" class="hidden" />
+          <button class="btn btn-sm" id="btn-load-demo">Load Demo Data</button>
+          <button class="btn btn-sm btn-danger" id="btn-clear-all">Clear All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications -->
+  <div class="section">
+    <h2 class="section-title">Applications</h2>
+    <div class="table-wrap">
+      <table class="apps-table">
+        <thead>
+          <tr>
+            <th data-sort="company">Company</th>
+            <th data-sort="role">Role</th>
+            <th data-sort="track">Track</th>
+            <th data-sort="status">Status</th>
+            <th data-sort="fitScore">Fit Score</th>
+            <th data-sort="priority">Priority</th>
+            <th data-sort="appliedDate">Applied Date</th>
+            <th data-sort="followUpDate">Follow-up Date</th>
+            <th data-sort="resumeVersion">Resume Used</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="apps-tbody"></tbody>
+      </table>
+      <div class="empty-note hidden" id="apps-empty" style="padding: 30px 20px;">
+        No applications match the current filters.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    Your data is stored locally in your browser unless you export it.
+  </div>
+</footer>
+
+<!-- Edit modal -->
+<div class="modal-overlay hidden" id="edit-modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Application</h3>
+      <button class="modal-close" id="edit-modal-close" aria-label="Close">&times;</button>
+    </div>
+    <form id="edit-form">
+      <input type="hidden" id="e-id" />
+      <div class="form-grid">
+        <div class="field">
+          <label for="e-company">Company *</label>
+          <input type="text" id="e-company" required maxlength="120" />
+        </div>
+        <div class="field">
+          <label for="e-role">Role Title *</label>
+          <input type="text" id="e-role" required maxlength="120" />
+        </div>
+        <div class="field">
+          <label for="e-track">Track</label>
+          <select id="e-track"></select>
+        </div>
+        <div class="field">
+          <label for="e-resume">Resume Version</label>
+          <select id="e-resume"></select>
+        </div>
+
+        <div class="field">
+          <label for="e-status">Status</label>
+          <select id="e-status"></select>
+        </div>
+        <div class="field">
+          <label for="e-fitscore">Fit Score (1–10) *</label>
+          <input type="number" id="e-fitscore" min="1" max="10" step="1" required />
+          <div class="field-hint">Apply seriously to roles scoring 7 or above.</div>
+        </div>
+        <div class="field">
+          <label for="e-applied">Applied Date</label>
+          <input type="date" id="e-applied" />
+        </div>
+        <div class="field">
+          <label for="e-followup">Follow-up Date</label>
+          <input type="date" id="e-followup" />
+        </div>
+
+        <div class="field span-2">
+          <label for="e-joblink">Job Link</label>
+          <input type="url" id="e-joblink" placeholder="https://..." />
+        </div>
+        <div class="field">
+          <label for="e-salary">Salary Estimate</label>
+          <input type="text" id="e-salary" />
+        </div>
+        <div class="field">
+          <label for="e-contact">Contact Person</label>
+          <input type="text" id="e-contact" />
+        </div>
+
+        <div class="field span-4">
+          <label for="e-notes">Notes</label>
+          <textarea id="e-notes"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" id="edit-form-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/tracker.js"></script>
+</body>
+</html>
